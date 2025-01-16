@@ -1,7 +1,11 @@
+# CRUD ToDo App Frontend
 
+Этот проект представляет собой фронтенд для приложения управления задачами (ToDo). Реализован с использованием Vite и React.
 
-# React Vite Template
+## Установка и запуск
 
-## This repository provides a ready-to-use React project template built with Vite for efficient development. Key features include:
+### 1. Установите зависимости
+Убедитесь, что у вас установлен Node.js (рекомендуется версия 18 или выше). Затем выполните:
 
- In this template included Axios, Tailwindcss and configured folder structure for start write code.
+```bash
+npm install
