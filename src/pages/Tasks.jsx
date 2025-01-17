@@ -6,6 +6,9 @@ import axios from 'axios';
 import { ClipLoader } from 'react-spinners';
 import { toast, ToastContainer } from 'react-toastify';  
 import 'react-toastify/dist/ReactToastify.css'; 
+import DOMPurify from 'dompurify'; 
+
+const sanitize = (data) => DOMPurify.sanitize(data); // Функция очистки данных
 
 const Tasks = () => {
   const navigate = useNavigate();
@@ -29,7 +32,11 @@ const Tasks = () => {
         },
       });
       if (response.status === 200) {
-        setTasks(response.data);
+        const sanitizedTasks = response.data.map((task) => ({
+          ...task,
+          title: sanitize(task.title), // Очистка заголовков задач
+        }));
+        setTasks(sanitizedTasks);
       }
     } catch (error) {
       console.error('Ошибка загрузки задач:', error.response?.data || error.message);
@@ -50,6 +57,7 @@ const Tasks = () => {
   const handleSaveTask = async () => {
     setLoading(true);
     try {
+      const sanitizedTitle = sanitize(taskTitle); // Очистка данных перед отправкой
       const url = editingTask
         ? `http://localhost:8000/api/todo/tasks/${editingTask.id}/`
         : 'http://localhost:8000/api/todo/tasks/';
@@ -59,7 +67,7 @@ const Tasks = () => {
         method,
         url,
         data: {
-          title: taskTitle,
+          title: sanitizedTitle,
         },
         headers: {
           Authorization: `Bearer ${token}`,
@@ -70,10 +78,10 @@ const Tasks = () => {
       setTaskTitle('');
       setIsModalOpen(false);
       setEditingTask(null);
-      toast.success('Задача успешно сохранена!');  // Успешное уведомление
+      toast.success('Задача успешно сохранена!');
     } catch (error) {
       console.error('Ошибка при сохранении задачи:', error.response?.data || error.message);
-      toast.error('Ошибка при сохранении задачи!');  // Ошибка уведомления
+      toast.error('Ошибка при сохранении задачи!');
     } finally {
       setLoading(false);
     }
@@ -88,10 +96,10 @@ const Tasks = () => {
         },
       });
       await fetchTasks();
-      toast.success('Задача успешно удалена!');  // Успешное уведомление
+      toast.success('Задача успешно удалена!');
     } catch (error) {
       console.error('Ошибка при удалении задачи:', error.response?.data || error.message);
-      toast.error('Ошибка при удалении задачи!');  // Ошибка уведомления
+      toast.error('Ошибка при удалении задачи!');
     } finally {
       setLoading(false);
     }
@@ -110,10 +118,10 @@ const Tasks = () => {
         }
       );
       await fetchTasks();
-      toast.success('Статус задачи обновлен!');  // Успешное уведомление
+      toast.success('Статус задачи обновлен!');
     } catch (error) {
       console.error('Ошибка при изменении статуса задачи:', error.response?.data || error.message);
-      toast.error('Ошибка при изменении статуса задачи!');  // Ошибка уведомления
+      toast.error('Ошибка при изменении статуса задачи!');
     } finally {
       setLoading(false);
     }
@@ -153,7 +161,10 @@ const Tasks = () => {
                   >
                     <div className="flex justify-between items-center">
                       <div>
-                        <span className="text-lg font-medium">{task.title}</span>
+                        <span
+                          className="text-lg font-medium"
+                          dangerouslySetInnerHTML={{ __html: sanitize(task.title) }}
+                        ></span>
                         <p className="text-sm text-white bg-green-600 rounded px-2 py-0">
                           Создано: {new Date(task.created_at).toLocaleString()}
                         </p>
@@ -202,7 +213,10 @@ const Tasks = () => {
                   >
                     <div className="flex justify-between items-center">
                       <div>
-                        <span className="text-lg font-medium">{task.title}</span>
+                        <span
+                          className="text-lg font-medium"
+                          dangerouslySetInnerHTML={{ __html: sanitize(task.title) }}
+                        ></span>
                         <p className="text-sm text-white bg-gradient-to-r from-red-500 to-orange-500 rounded px-2 py-0">
                           Создано: {new Date(task.created_at).toLocaleString()}
                         </p>
@@ -272,7 +286,7 @@ const Tasks = () => {
         </div>
       )}
 
-      <ToastContainer />  {/* Добавляем контейнер для Toastr */}
+      <ToastContainer />
     </div>
   );
 };
